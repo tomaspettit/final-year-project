@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-//import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -17,7 +17,10 @@ import {
   DialogContentText,
   DialogTitle,
   Select,
-  MenuItem
+  MenuItem,
+  FormControl,
+  FormLabel,
+  CircularProgress
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CachedIcon from "@mui/icons-material/Cached";
@@ -27,27 +30,33 @@ import InstallPWA from "../Components/InstallPWA";
 import { useColorScheme } from '@mui/material/styles';
 
 const Settings: React.FC = () => {
-  //const { logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  
+  // Appearance settings with state
+  const [boardTheme, setBoardTheme] = useState(
+    localStorage.getItem('boardTheme') || 'classic'
+  );
+  const [pieceSet, setPieceSet] = useState(
+    localStorage.getItem('pieceSet') || 'standard'
+  );
 
-  // Function to clear cache
+  const { mode, setMode } = useColorScheme();
+
+  // Function to clear cache (only Cache API, not auth storage)
   const clearCache = async () => {
+    setIsClearing(true);
     try {
       // Clear caches using Cache API
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
-
-      // Clear localStorage
-      localStorage.clear();
-
-      // Clear sessionStorage
-      sessionStorage.clear();
 
       setSnackbarMessage("Cache cleared successfully!");
       setSnackbarSeverity("success");
@@ -61,13 +70,15 @@ const Settings: React.FC = () => {
       setSnackbarOpen(true);
       
       return false;
+    } finally {
+      setIsClearing(false);
     }
   };
 
   const handleLogout = async () => {
     try {
-      //await logout();
-      window.location.href = "/";
+      await logout();
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Logout failed", error);
       setSnackbarMessage("Logout failed");
@@ -76,74 +87,86 @@ const Settings: React.FC = () => {
     }
   };
 
-  const openClearCacheConfirmation = () => {
-    setConfirmDialogOpen(true);
-  };
-
   const handleClearCacheConfirmed = async () => {
     setConfirmDialogOpen(false);
-    await clearCache();
-    // Log the user out and redirect to home
-    //await logout();
-    navigate("/");
+    const success = await clearCache();
+    if (success) {
+      // Only logout and redirect if cache was cleared successfully
+      await logout();
+      navigate("/", { replace: true });
+    }
   };
 
-  const { mode, setMode } = useColorScheme();
+  // Handle appearance changes
+  const handleBoardThemeChange = (theme: string) => {
+    setBoardTheme(theme);
+    localStorage.setItem('boardTheme', theme);
+    // TODO: Apply theme to board component
+  };
+
+  const handlePieceSetChange = (set: string) => {
+    setPieceSet(set);
+    localStorage.setItem('pieceSet', set);
+    // TODO: Apply piece set to board component
+  };
+
+  // Loading state
   if (!mode) {
-    return null;
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", p: 2 }}>
       <Card sx={{ 
-        width: "400px", 
+        width: "100%",
+        maxWidth: "450px", 
         padding: 3, 
         textAlign: "center", 
-        boxShadow: '0 8px 24px rgba(85, 0, 170, 0.15)', 
-        borderRadius: '12px',
-        backgroundColor: "#ffffff" 
+        boxShadow: 3,
+        borderRadius: 3,
       }}>
         <CardContent>
           {/* Back Button */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <IconButton onClick={() => navigate("/profile")} sx={{ color: "#5500aa" }}>
+            <IconButton onClick={() => navigate("/profile")} color="primary">
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h5" color="#5500aa" fontWeight="bold">Settings</Typography>
+            <Typography variant="h5" color="primary" fontWeight="bold">Settings</Typography>
           </Box>
 
-          <Divider sx={{ mb: 2, bgcolor: "#ddaaff" }} />
+          <Divider sx={{ mb: 3 }} />
 
-          <Typography variant="body1" sx={{ mb: 2, color: "#666" }}>Manage your account settings.</Typography>
+          <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
+            Manage your account settings.
+          </Typography>
 
           {/* Cache Management Section */}
           <Box sx={{ 
             mt: 3, 
             p: 2, 
-            borderRadius: '8px', 
-            backgroundColor: '#f8f5ff', 
-            border: '1px solid #ddaaff',
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+            border: 1,
+            borderColor: 'divider',
             mb: 3
           }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "#5500aa" }}>Cache Management</Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              Cache Management
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
               If you're experiencing issues with outdated content, clearing the cache may help.
             </Typography>
             <Button 
               variant="outlined" 
-              startIcon={<CachedIcon />}
-              onClick={openClearCacheConfirmation} 
-              sx={{ 
-                width: "100%",
-                color: "#5500aa",
-                borderColor: "#5500aa",
-                '&:hover': { 
-                  borderColor: "#7722cc",
-                  backgroundColor: 'rgba(85,0,170,0.04)'
-                },
-                borderRadius: '8px',
-                mb: 2,
-              }}
+              startIcon={isClearing ? <CircularProgress size={20} /> : <CachedIcon />}
+              onClick={() => setConfirmDialogOpen(true)} 
+              disabled={isClearing}
+              fullWidth
+              sx={{ borderRadius: 2, mb: 2 }}
             >
               Clear Cache & Reload
             </Button>
@@ -153,65 +176,100 @@ const Settings: React.FC = () => {
           <Box sx={{ 
             mt: 3, 
             p: 2, 
-            borderRadius: '8px', 
-            backgroundColor: '#f8f5ff', 
-            border: '1px solid #ddaaff',
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+            border: 1,
+            borderColor: 'divider',
             mb: 3
           }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "#5500aa" }}>Install App</Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              Install App
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2, color: "text.secondary" }}>
               Install GOTCG on your device for a better experience and offline access.
             </Typography>
             <InstallPWA />
           </Box>
 
-          {/* Appearance Section - Placeholder for future features */}
+          {/* Appearance Section */}
           <Box sx={{ 
             mt: 3, 
             p: 2, 
-            borderRadius: '8px', 
-            backgroundColor: '#f8f5ff', 
-            border: '1px solid #ddaaff',
-            mb: 3
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+            border: 1,
+            borderColor: 'divider',
+            mb: 3,
+            textAlign: 'left'
           }}>
-            <Typography variant="h6" sx={{ mb: 2, color: "#5500aa" }}>🎨 Appearance</Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: "#666" }}>
-             Customize the look and feel of the application. (Coming Soon)
+            <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+              🎨 Appearance
             </Typography>
-            {/* Future appearance settings can be added here */}
-            Theme: <Select sx={{ borderRadius: '8px' }}
-            value={mode}
-            onChange={(event) =>
-            setMode(event.target.value as 'system' | 'light' | 'dark')
-          }>
-              <MenuItem value="light">Light Mode</MenuItem>
-              <MenuItem value="dark">Dark Mode</MenuItem>
-              <MenuItem value="system">System Default</MenuItem>
-            </Select>
-            <br /><br />
-            Board Theme: <Select defaultValue="classic" sx={{ borderRadius: '8px', ml: 1 }}>
-              <MenuItem value="classic">Classic</MenuItem>
-              <MenuItem value="modern">Modern</MenuItem>
-              <MenuItem value="wooden">Wooden</MenuItem>
-            </Select>
-            <br /><br />
-            Piece Set: <Select defaultValue="standard" sx={{ borderRadius: '8px', ml: 1 }}>
-              <MenuItem value="standard">Standard</MenuItem>
-              <MenuItem value="fancy">Fancy</MenuItem>
-              <MenuItem value="minimal">Minimal</MenuItem>
-            </Select>
+            <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
+              Customize the look and feel of the application.
+            </Typography>
+            
+            {/* Theme Mode */}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <FormLabel sx={{ mb: 1, fontSize: '0.875rem', color: 'text.primary' }}>
+                Theme Mode
+              </FormLabel>
+              <Select
+                value={mode}
+                onChange={(event) => setMode(event.target.value as 'system' | 'light' | 'dark')}
+                fullWidth
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="light">Light Mode</MenuItem>
+                <MenuItem value="dark">Dark Mode</MenuItem>
+                <MenuItem value="system">System Default</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Board Theme */}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <FormLabel sx={{ mb: 1, fontSize: '0.875rem', color: 'text.primary' }}>
+                Board Theme
+              </FormLabel>
+              <Select 
+                value={boardTheme}
+                onChange={(e) => handleBoardThemeChange(e.target.value)}
+                fullWidth
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="classic">Classic</MenuItem>
+                <MenuItem value="modern">Modern</MenuItem>
+                <MenuItem value="wooden">Wooden</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Piece Set */}
+            <FormControl fullWidth>
+              <FormLabel sx={{ mb: 1, fontSize: '0.875rem', color: 'text.primary' }}>
+                Piece Set
+              </FormLabel>
+              <Select 
+                value={pieceSet}
+                onChange={(e) => handlePieceSetChange(e.target.value)}
+                fullWidth
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="standard">Standard</MenuItem>
+                <MenuItem value="fancy">Fancy</MenuItem>
+                <MenuItem value="minimal">Minimal</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
 
           {/* Logout Button */}
           <Button 
             variant="contained" 
+            color="error"
             startIcon={<ExitToAppIcon />}
+            fullWidth
             sx={{ 
-              mt: 2, 
-              width: "100%", 
-              bgcolor: "#f44336",
-              '&:hover': { bgcolor: "#d32f2f" },
-              borderRadius: '8px',
+              mt: 2,
+              borderRadius: 2,
               py: 1.2,
             }} 
             onClick={handleLogout}
@@ -231,7 +289,7 @@ const Settings: React.FC = () => {
         <Alert 
           onClose={() => setSnackbarOpen(false)} 
           severity={snackbarSeverity}
-          sx={{ width: '100%' }}
+          variant="filled"
         >
           {snackbarMessage}
         </Alert>
@@ -241,41 +299,36 @@ const Settings: React.FC = () => {
       <Dialog
         open={confirmDialogOpen}
         onClose={() => setConfirmDialogOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            p: 1
-          }
-        }}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
       >
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningIcon sx={{ color: "#f57c00" }} />
-          <Typography color="#5500aa" fontWeight="bold">Warning: This Will Log You Out</Typography>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
+          <WarningIcon color="warning" />
+          <Typography fontWeight="bold">Warning: This Will Log You Out</Typography>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Clearing the cache will remove all stored data and log you out of the application. You will need to log in again after this action.
+            Clearing the cache will remove all stored data and log you out of the application. 
+            You will need to log in again after this action.
             <br /><br />
             Do you want to continue?
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button 
             onClick={() => setConfirmDialogOpen(false)}
-            sx={{ color: "#666" }}
+            color="inherit"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleClearCacheConfirmed}
             variant="contained"
-            sx={{ 
-              bgcolor: "#f57c00",
-              '&:hover': { bgcolor: "#e65100" },
-              color: "white"
-            }}
+            color="warning"
+            disabled={isClearing}
           >
-            Clear Cache & Log Out
+            {isClearing ? 'Clearing...' : 'Clear Cache & Log Out'}
           </Button>
         </DialogActions>
       </Dialog>
