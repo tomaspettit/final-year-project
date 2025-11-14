@@ -1,4 +1,4 @@
-import type { Board, PieceColor, Position } from '../Types/chess';
+import type { Board, PieceColor, Position} from '../Types/chess';
 
 export function createInitialBoard(): Board {
   const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
@@ -32,12 +32,10 @@ export function createInitialBoard(): Board {
   return board;
 }
 
-/* Check if a position is within the bounds of the board */
 export function isValidPosition(pos: Position): boolean {
   return pos.row >= 0 && pos.row < 8 && pos.col >= 0 && pos.col < 8;
 }
 
-/* Get all legal moves for a piece at a given position */
 export function getLegalMoves(
   board: Board,
   position: Position,
@@ -69,7 +67,7 @@ export function getLegalMoves(
       break;
   }
   
-  /* Filter out moves that would put own king in check */
+  // Filter out moves that would put own king in check
   if (checkForCheck) {
     moves = moves.filter(move => {
       const newBoard = simulateMove(board, position, move);
@@ -80,18 +78,17 @@ export function getLegalMoves(
   return moves;
 }
 
-/* Get all possible pawn moves */
 function getPawnMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   const moves: Position[] = [];
   const direction = color === 'white' ? -1 : 1;
   const startRow = color === 'white' ? 6 : 1;
   
-  /* Move forward one square */
+  // Move forward one square
   const forward = { row: pos.row + direction, col: pos.col };
   if (isValidPosition(forward) && !board[forward.row][forward.col]) {
     moves.push(forward);
     
-    /* Move forward two squares from starting position */
+    // Move forward two squares from starting position
     if (pos.row === startRow) {
       const doubleForward = { row: pos.row + direction * 2, col: pos.col };
       if (!board[doubleForward.row][doubleForward.col]) {
@@ -100,7 +97,7 @@ function getPawnMoves(board: Board, pos: Position, color: PieceColor): Position[
     }
   }
   
-  /* Capture diagonally */
+  // Captures
   for (const colOffset of [-1, 1]) {
     const capture = { row: pos.row + direction, col: pos.col + colOffset };
     if (isValidPosition(capture)) {
@@ -114,7 +111,6 @@ function getPawnMoves(board: Board, pos: Position, color: PieceColor): Position[
   return moves;
 }
 
-/* Get all possible rook moves */
 function getRookMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   const moves: Position[] = [];
   const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
@@ -141,7 +137,6 @@ function getRookMoves(board: Board, pos: Position, color: PieceColor): Position[
   return moves;
 }
 
-/* Get all possible knight moves */
 function getKnightMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   const moves: Position[] = [];
   const offsets = [
@@ -162,7 +157,6 @@ function getKnightMoves(board: Board, pos: Position, color: PieceColor): Positio
   return moves;
 }
 
-/* Get all possible bishop moves */
 function getBishopMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   const moves: Position[] = [];
   const directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
@@ -189,12 +183,10 @@ function getBishopMoves(board: Board, pos: Position, color: PieceColor): Positio
   return moves;
 }
 
-/* Get all possible queen moves by combining rook and bishop moves */
 function getQueenMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   return [...getRookMoves(board, pos, color), ...getBishopMoves(board, pos, color)];
 }
 
-/* Get all possible king moves including castling */
 function getKingMoves(board: Board, pos: Position, color: PieceColor): Position[] {
   const moves: Position[] = [];
   const offsets = [
@@ -216,7 +208,6 @@ function getKingMoves(board: Board, pos: Position, color: PieceColor): Position[
   return moves;
 }
 
-/* Simulate a move on the board and return the new board state */
 export function simulateMove(board: Board, from: Position, to: Position): Board {
   const newBoard = board.map(row => [...row]);
   const piece = newBoard[from.row][from.col];
@@ -225,7 +216,6 @@ export function simulateMove(board: Board, from: Position, to: Position): Board 
   return newBoard;
 }
 
-/* Find the position of the king of the given color */
 export function findKing(board: Board, color: PieceColor): Position | null {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
@@ -238,14 +228,13 @@ export function findKing(board: Board, color: PieceColor): Position | null {
   return null;
 }
 
-/* Check if the king of the given color is in check */
 export function isKingInCheck(board: Board, color: PieceColor): boolean {
   const kingPos = findKing(board, color);
   if (!kingPos) return false;
   
   const opponentColor = color === 'white' ? 'black' : 'white';
   
-  /* Check if any opponent piece can attack the king */
+  // Check if any opponent piece can attack the king
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const piece = board[row][col];
@@ -261,7 +250,6 @@ export function isKingInCheck(board: Board, color: PieceColor): boolean {
   return false;
 }
 
-/* Check if the player has any legal moves */
 export function hasLegalMoves(board: Board, color: PieceColor): boolean {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
@@ -275,23 +263,19 @@ export function hasLegalMoves(board: Board, color: PieceColor): boolean {
   return false;
 }
 
-/* Check for checkmate condition */
 export function isCheckmate(board: Board, color: PieceColor): boolean {
   return isKingInCheck(board, color) && !hasLegalMoves(board, color);
 }
 
-/* Check for stalemate condition */
 export function isStalemate(board: Board, color: PieceColor): boolean {
   return !isKingInCheck(board, color) && !hasLegalMoves(board, color);
 }
 
-/* Get position notation in standard algebraic format */
 export function getPositionNotation(pos: Position): string {
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   return `${files[pos.col]}${8 - pos.row}`;
 }
 
-/* Get move notation in standard algebraic format */
 export function getMoveNotation(board: Board, from: Position, to: Position): string {
   const piece = board[from.row][from.col];
   if (!piece) return '';
@@ -309,7 +293,6 @@ export function getMoveNotation(board: Board, from: Position, to: Position): str
   return `${pieceSymbol}${capture}${destination}`;
 }
 
-/* Get all legal moves for a given color */
 export function getAllLegalMoves(board: Board, color: PieceColor): Array<{ from: Position; to: Position }> {
   const allMoves: Array<{ from: Position; to: Position }> = [];
   

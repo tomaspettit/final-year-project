@@ -21,6 +21,8 @@ export interface Move {
   isEnPassant?: boolean;
   isCastling?: boolean;
   promotionTo?: PieceType;
+  accuracy?: number; // Accuracy score from 0-100
+  accuracyClass?: 'excellent' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
 }
 
 export type Board = (Piece | null)[][];
