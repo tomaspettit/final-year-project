@@ -62,8 +62,8 @@ const theme = createTheme({
       paper: '#ffffff'
     },
     text: {
-      primary: "#000000",
-      secondary: "#ffffff",
+      primary: "#ffffffff",
+      secondary: "#000000ff",
     },
     error: {
       main: "#d32f2f",
@@ -108,6 +108,13 @@ const theme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+        },
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: '#000000',
         },
       },
     },

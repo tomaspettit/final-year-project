@@ -129,3 +129,8 @@ button:hover {
 .custom-textfield .MuiOutlinedInput-root.Mui-focused fieldset {
   border-color: #6e8efb; /* Blue focus effect */
 }
+
+.typography-custom {
+  font-size: 1rem;
+  color: #ff0000;
+}
