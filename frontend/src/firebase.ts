@@ -10,13 +10,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCTb8B0zbUM2IIjtXqG6lkuORjNTHY5tLs",
-  authDomain: "gotcg-chess.firebaseapp.com",
-  projectId: "gotcg-chess",
-  storageBucket: "gotcg-chess.firebasestorage.app",
-  messagingSenderId: "229886622395",
-  appId: "1:229886622395:web:ea211b9270567f8a49479e",
-  measurementId: "G-JD04HC2EFW"
+  apiKey: "AIzaSyDM0Io1HIDoF4ZtlX2u8CgTraXPTZ7qn0c",
+  authDomain: "gotcg-e7c8b.firebaseapp.com",
+  projectId: "gotcg-e7c8b",
+  storageBucket: "gotcg-e7c8b.firebasestorage.app",
+  messagingSenderId: "784924647824",
+  appId: "1:784924647824:web:507e0a77fa50d9a0f65315",
+  measurementId: "G-6Z8PR7WMNS"
 };
 
 // Initialize Firebase
