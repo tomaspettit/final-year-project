@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Grid, Paper, Typography, CircularProgress } from '@mui/material';
-import ChessBoard from '../Components/ChessBoard';
-import GameControls from '../Components/GameControls';
-import CapturedPieces from '../Components/CapturedPieces';
-import MoveHistory from '../Components/MoveHistory';
-import Timer from '../Components/Timer';
-import AccuracyStats from '../Components/AccuracyStats';
+import ChessBoard from '../Components/PlayComponents/ChessBoard';
+import GameControls from '../Components/PlayComponents/GameControls';
+import CapturedPieces from '../Components/PlayComponents/CapturedPieces';
+import MoveHistory from '../Components/PlayComponents/MoveHistory';
+import Timer from '../Components/PlayComponents/Timer';
+import AccuracyStats from '../Components/PlayComponents/AccuracyStats';
 import type { GameState, Position, Move, Piece, GameMode, TimerState } from '../Types/chess';
 import {
   createInitialBoard,
