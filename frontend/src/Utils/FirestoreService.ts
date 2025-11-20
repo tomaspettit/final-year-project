@@ -1,18 +1,5 @@
-import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, collection, addDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-const auth = getAuth();
-
-// ✅ Define History Type
-interface History {
-    id: string;
-    matchUp: string;
-    date: Date | null;
-    result: string;
-    move: number;
-    TimeControl: string | null;
-    action: string | null;
-  }
 
 /**
  * Create a new user document in Firestore
@@ -46,31 +33,6 @@ export const setUserRating = async (uid: string, ratingScore: number) => {
   };
 
 /**
- * Add a history for a user
- */
-export const addUserHistory = async (uid: string, historyData: Omit<History, 'id'>) => {
-  try {
-    const historyCollectionRef = collection(db, "users", uid, "history");
-    await addDoc(historyCollectionRef, historyData);
-    console.log("User history added successfully.");
-  } catch (error) {
-    console.error("Error adding user history:", error);
-  }
-}
-
-/**
- * Update history proficiency
- */
-export const updateHistoryProficiency = async (uid: string, historyId: string, updatedData: Partial<History>) => {
-  try {
-    await updateDoc(doc(db, "users", uid, "history", historyId), updatedData);
-    console.log("History proficiency updated successfully.");
-  } catch (error) {
-    console.error("Error updating history proficiency:", error);
-  }
-};
-
-/**
  * Get user profile details from Firestore
  */
 export const getUserProfile = async (uid: string) => {
@@ -88,58 +50,37 @@ export const getUserProfile = async (uid: string) => {
   };
 
   /**
- * Get the user's rating and histories from Firestore
+ * Get the user's rating from Firestore
  */
-export const getUserRatingAndHistories = async (uid: string) => {
+export const getUserRating = async (uid: string) => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
-      if (!userDoc.exists()) {
-        return null; // User does not exist
+      let rating = null;
+      let name = null; // ✅ Add name variable
+  
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        rating = userData.rating || null;
+        name = userData.name || null; // ✅ Fetch name from Firestore
       }
-  
-      const userData = userDoc.data();
-      const rating = userData?.rating || 0;
-  
-      const historiesSnapshot = await getDocs(collection(db, "users", uid, "history"));
-      const histories: History[] = [];
-  
-      historiesSnapshot.forEach((doc) => {
-        histories.push({ id: doc.id, ...(doc.data() as Omit<History, 'id'>) });
-      });
-  
-      return { rating, histories };
+      
+      return { name, rating }; // ✅ Return name along with rating and histories
     } catch (error) {
-      console.error("Error fetching user rating and histories:", error);
-      return null;
+      console.error("Firestore: Error fetching rating and histories:", error);
+      return { name: null, rating: null }; // ✅ Return null values in case of error
     }
-  };
 
-  /**
- * Get history by ID for a user
- */
-export const getHistoryById = async (uid: string, historyId: string) => {
-    try {
-      const historyDoc = await getDoc(doc(db, "users", uid, "history", historyId));
-      if (historyDoc.exists()) {
-        return { id: historyDoc.id, ...(historyDoc.data() as Omit<History, 'id'>) };
-      } else {
-        return null; // History does not exist
-      }
-    } catch (error) {
-      console.error("Error fetching history by ID:", error);
-      return null;
-    }
-  }
+  };
   
 /**
- * Update history description for a user
+ * Update rating  for a user
  */
-export const updateHistoryDescription = async (uid: string, historyId: string, description: string) => {
-  try {
-    await updateDoc(doc(db, "users", uid, "history", historyId), { description });
-    console.log("History description updated successfully.");
-  } catch (error) {
-    console.error("Error updating history description:", error);
-  }
-};
+export const updateRating = async (uid: string, newRating: number) => {
+    try {
+      await updateDoc(doc(db, "users", uid), { rating: newRating });
+      console.log("User rating updated successfully.");
+    } catch (error) {
+      console.error("Error updating user rating:", error);
+    }
+  };
   
