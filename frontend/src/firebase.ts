@@ -15,8 +15,8 @@ const firebaseConfig = {
   projectId: "gotcg-e7c8b",
   storageBucket: "gotcg-e7c8b.firebasestorage.app",
   messagingSenderId: "784924647824",
-  appId: "1:784924647824:web:507e0a77fa50d9a0f65315",
-  measurementId: "G-6Z8PR7WMNS"
+  appId: "1:784924647824:web:f277f62cde9903fdf65315",
+  measurementId: "G-GT720E1EPR"
 };
 
 // Initialize Firebase

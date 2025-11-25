@@ -149,7 +149,7 @@ const Profile = () => {
         </Typography>
         <Typography variant="body1" sx={{ mt: 1, color: "#ddaaff" }}>
           <SchoolIcon sx={{ verticalAlign: "middle", mr: 1, color: "#5500aa" }} />
-          Course: {userData?.course || "No course selected"}
+          Rating: {userData?.rating || "No rating set"}
         </Typography>
       </Paper>
 

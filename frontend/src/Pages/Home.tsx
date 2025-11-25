@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, CircularProgress, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-import { getUserRatingAndHistories } from "../Utils/FirestoreService";
+import { getUserRating } from "../Utils/FirestoreService";
 
 const Home = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-
-    const [histories, setHistories] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [userData, setUserData] = useState<any>(null);
 
@@ -19,9 +17,8 @@ const Home = () => {
 
       try {
         setLoading(true);
-        const data = await getUserRatingAndHistories(user.uid);
+        const data = await getUserRating(user.uid);
         setUserData(data);
-        setHistories(data?.histories || []);
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -71,48 +68,6 @@ const Home = () => {
                 See All
             </Button>
             </Box>
-        {histories.length === 0 ? (
-          <Card
-              sx={{
-                width: "100%",
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(85, 0, 170, 0.1)",
-                p: 3,
-                textAlign: "center",
-              }}
-            >
-              <CardContent>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  No recent found
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate("/play")}
-                  sx={{ mt: 1, fontWeight: "bold", borderRadius: "8px" }}
-                >
-                  Play your first game
-                </Button>
-              </CardContent>
-            </Card>
-        ) : (
-          // Render study histories here
-          <Box>
-            {/* Map through histories and display them */}
-            {histories.map((history) => (
-              <Card
-                key={history.id}>
-                {/* You can customize the content of each history card here */}
-                <CardContent>
-                  <Typography variant="body1">{history.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {history.date}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        )}
     </Box>
 
     {/* Quick Info Section */}

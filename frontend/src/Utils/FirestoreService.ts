@@ -9,7 +9,7 @@ export const createUserProfile = async (uid: string, name: string, email: string
     await setDoc(doc(db, "users", uid), {
       name,
       email,
-      rating: 0, // User selects later
+      rating: 500, // User selects later
     });
     console.log("User profile created successfully.");
   } catch (error) {

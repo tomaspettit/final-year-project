@@ -28,6 +28,15 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import WarningIcon from "@mui/icons-material/Warning";
 import InstallPWA from "../Components/InstallPWA";
 import { useColorScheme } from '@mui/material/styles';
+import PaletteIcon from '@mui/icons-material/Palette';
+import GridOnIcon from '@mui/icons-material/GridOn';
+import TextureIcon from '@mui/icons-material/Texture';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import StarIcon from '@mui/icons-material/Star';
+import LensIcon from '@mui/icons-material/Lens';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import ComputerIcon from '@mui/icons-material/Computer';
 
 const Settings: React.FC = () => {
   const { logout } = useAuth();
@@ -220,9 +229,18 @@ const Settings: React.FC = () => {
                 fullWidth
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="light">Light Mode</MenuItem>
-                <MenuItem value="dark">Dark Mode</MenuItem>
-                <MenuItem value="system">System Default</MenuItem>
+                <MenuItem value="light">
+                  <LightModeIcon sx={{ color: "#ffd600", mr: 1 }} />
+                  Light Mode
+                </MenuItem>
+                <MenuItem value="dark">
+                  <DarkModeIcon sx={{ color: "#212121", mr: 1 }} />
+                  Dark Mode
+                </MenuItem>
+                <MenuItem value="system">
+                  <ComputerIcon sx={{ color: "#1976d2", mr: 1 }} />
+                  System Default
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -237,9 +255,18 @@ const Settings: React.FC = () => {
                 fullWidth
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="classic">Classic</MenuItem>
-                <MenuItem value="modern">Modern</MenuItem>
-                <MenuItem value="wooden">Wooden</MenuItem>
+                <MenuItem value="classic">
+                  <PaletteIcon sx={{ color: "#795548", mr: 1 }} />
+                  Classic
+                </MenuItem>
+                <MenuItem value="modern">
+                  <GridOnIcon sx={{ color: "#1976d2", mr: 1 }} />
+                  Modern
+                </MenuItem>
+                <MenuItem value="wooden">
+                  <TextureIcon sx={{ color: "#a1887f", mr: 1 }} />
+                  Wooden
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -254,9 +281,18 @@ const Settings: React.FC = () => {
                 fullWidth
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="standard">Standard</MenuItem>
-                <MenuItem value="fancy">Fancy</MenuItem>
-                <MenuItem value="minimal">Minimal</MenuItem>
+                <MenuItem value="standard">
+                  <EmojiEventsIcon sx={{ color: "#ffd600", mr: 1 }} />
+                  Standard
+                </MenuItem>
+                <MenuItem value="fancy">
+                  <StarIcon sx={{ color: "#f50057", mr: 1 }} />
+                  Fancy
+                </MenuItem>
+                <MenuItem value="minimal">
+                  <LensIcon sx={{ color: "#607d8b", mr: 1 }} />
+                  Minimal
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>

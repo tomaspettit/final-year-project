@@ -184,7 +184,7 @@ const Landing = () => {
                 Continue with Google
               </Button>
             </Box>
-            <Typography variant="body2" sx={{ mt: 2 }}>Don't have an account? 
+            <Typography variant="body2" sx={{ mt: 2, color: "white" }}>Don't have an account? 
             <Button onClick={() => setScreen("signup")}     
               sx={{
               textTransform: "uppercase",
