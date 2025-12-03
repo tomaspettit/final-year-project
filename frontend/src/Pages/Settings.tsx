@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../Context/AuthContext";
+import { useTheme } from "../Context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -27,18 +28,16 @@ import CachedIcon from "@mui/icons-material/Cached";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import WarningIcon from "@mui/icons-material/Warning";
 import InstallPWA from "../Components/InstallPWA";
-import { useColorScheme } from '@mui/material/styles';
 import PaletteIcon from '@mui/icons-material/Palette';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import TextureIcon from '@mui/icons-material/Texture';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
 import LensIcon from '@mui/icons-material/Lens';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import ComputerIcon from '@mui/icons-material/Computer';
+import { Sun, Moon } from "lucide-react";
 
 const Settings: React.FC = () => {
+  const { isDark, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -54,8 +53,6 @@ const Settings: React.FC = () => {
   const [pieceSet, setPieceSet] = useState(
     localStorage.getItem('pieceSet') || 'standard'
   );
-
-  const { mode, setMode } = useColorScheme();
 
   // Function to clear cache (only Cache API, not auth storage)
   const clearCache = async () => {
@@ -119,15 +116,6 @@ const Settings: React.FC = () => {
     // TODO: Apply piece set to board component
   };
 
-  // Loading state
-  if (!mode) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", p: 2 }}>
       <Card sx={{ 
@@ -152,6 +140,10 @@ const Settings: React.FC = () => {
           <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
             Manage your account settings.
           </Typography>
+
+          <Button onClick={toggleTheme} sx={{ mt: 2, ml: 2 }}>
+                  {isDark ? <Sun /> : <Moon />}
+          </Button>
 
           {/* Cache Management Section */}
           <Box sx={{ 
@@ -217,32 +209,9 @@ const Settings: React.FC = () => {
             <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
               Customize the look and feel of the application.
             </Typography>
-            
-            {/* Theme Mode */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <FormLabel sx={{ mb: 1, fontSize: '0.875rem', color: 'text.primary' }}>
-                Theme Mode
-              </FormLabel>
-              <Select
-                value={mode}
-                onChange={(event) => setMode(event.target.value as 'system' | 'light' | 'dark')}
-                fullWidth
-                sx={{ borderRadius: 2 }}
-              >
-                <MenuItem value="light">
-                  <LightModeIcon sx={{ color: "#ffd600", mr: 1 }} />
-                  Light Mode
-                </MenuItem>
-                <MenuItem value="dark">
-                  <DarkModeIcon sx={{ color: "#212121", mr: 1 }} />
-                  Dark Mode
-                </MenuItem>
-                <MenuItem value="system">
-                  <ComputerIcon sx={{ color: "#1976d2", mr: 1 }} />
-                  System Default
-                </MenuItem>
-              </Select>
-            </FormControl>
+            <Button onClick={toggleTheme} sx={{ mt: 2, ml: 2 }}>
+                  {isDark ? <Sun /> : <Moon />}
+            </Button>
 
             {/* Board Theme */}
             <FormControl fullWidth sx={{ mb: 2 }}>

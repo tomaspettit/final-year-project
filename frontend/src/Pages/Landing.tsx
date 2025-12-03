@@ -15,15 +15,17 @@ import ChessTheme from "../assets/chess_board.jpg";
 
 // Features for the slideshow
 const slides = [
-  { title: "AI-Powered Study Planner", description: "Get personalized study plans based on your progress and goals." },
-  { title: "Smart Project Recommendations", description: "AI suggests coding projects to enhance your portfolio." },
-  { title: "GitHub Integration", description: "Connect GitHub to analyze your coding skills and track growth." },
-  { title: "Build Your Portfolio", description: "Showcase your work with an AI-generated portfolio." },
+  { title: "The Grandmaster Awaits", description: "Step into the world of strategy, legacy, and legendary chess battles." },
+  { title: "Meet the Guardians", description: "Mystical protectors and mentors guide the Grandmaster through challenges." },
+  { title: "The Challenger Approaches", description: "A cunning rival tests every move, every decision, and every strategy." },
+  { title: "The Battle Unfolds", description: "Every move matters. Witness the clash of minds and tactics on the board." },
+  { title: "Victory & Legacy", description: "The Grandmaster’s triumph reveals the power of guidance, patience, and strategy." },
+  { title: "Your Turn to Master", description: "Use AI-powered tools to plan, learn, and build your chess and life strategy." }
 ];
 
 const Landing = () => {
   const [screen, setScreen] = useState<"landing" | "login" | "signup">("landing");
-  const [form, setForm] = useState({ name: "", rating: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", rating: 500, email: "", password: "" });
 
   useEffect(() => {
     document.body.style.overflow = "hidden"; // Disable scrolling
@@ -76,7 +78,7 @@ const Landing = () => {
         await setDoc(userRef, {
           name: user.displayName || "",
           email: user.email,
-          course: "",
+          rating: 500, // Default rating
         });
       }
     } catch (error: any) {
@@ -117,8 +119,8 @@ const Landing = () => {
             {slides.map((slide, index) => (
               <SwiperSlide key={index}>
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                  <Typography variant="h5" fontWeight="bold">{slide.title}</Typography>
-                  <Typography variant="body1" sx={{ mt: 1, maxWidth: "300px" }}>{slide.description}</Typography>
+                  <Typography variant="h5" fontWeight="bold" sx={{color: "white"}}>{slide.title}</Typography>
+                  <Typography variant="body1" sx={{ mt: 1, maxWidth: "300px", color: "white" }}>{slide.description}</Typography>
                 </Box>
               </SwiperSlide>
             ))}

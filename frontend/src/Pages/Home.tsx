@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, CircularProgress, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
+import { useTheme } from "../Context/ThemeContext";
+import { Sun, Moon } from "lucide-react";
 import { getUserRating } from "../Utils/FirestoreService";
 
 const Home = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { isDark, toggleTheme } = useTheme();
     const [loading, setLoading] = useState<boolean>(true);
     const [userData, setUserData] = useState<any>(null);
 
@@ -51,9 +54,12 @@ const Home = () => {
       <Box sx={{ mb: 4, textAlign: "center" }}>
         <Typography variant="h4" color="#5500aa" fontWeight="bold" gutterBottom>
           Welcome, {userData?.name || "Chess Player"}!
+          <Button onClick={toggleTheme} sx={{ mt: 2 }}>
+          {isDark ? <Sun /> : <Moon />}
+        </Button>
         </Typography>
         {userData?.rating && (
-          <Typography variant="body1" color="text.primary">
+          <Typography variant="body1" color="text.secondary">
             Your Rating: {userData.rating}
           </Typography>
         )}
@@ -82,7 +88,7 @@ const Home = () => {
                 borderRadius: "12px",
                 boxShadow: "0 4px 12px rgba(85, 0, 170, 0.1)",
                 height: "100%",
-                bgcolor: "#f8f5ff",
+                bgcolor: "#b9aed3ff",
               }}
             >
               <CardContent>
@@ -111,7 +117,7 @@ const Home = () => {
                 borderRadius: "12px",
                 boxShadow: "0 4px 12px rgba(85, 0, 170, 0.1)",
                 height: "100%",
-                bgcolor: "#f8f5ff",
+                bgcolor: "#83f38eff",
               }}
             >
               <CardContent>
@@ -143,7 +149,6 @@ const Home = () => {
           borderRadius: "12px",
           boxShadow: "0 4px 12px rgba(85, 0, 170, 0.1)",
           bgcolor: "#5500aa",
-          color: "white",
           mb: 5,
         }}
       >
