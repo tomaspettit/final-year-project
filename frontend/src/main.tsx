@@ -5,6 +5,7 @@ import App from './App';
 import { AuthProvider } from "./Context/AuthContext";
 import { ThemeProvider } from "./Context/ThemeContext";
 import { BrowserRouter } from 'react-router-dom';
+import { BoardThemeProvider } from './Context/BoardThemeContext';
 
 
 const root = ReactDOM.createRoot(
@@ -14,9 +15,11 @@ root.render(
   <React.StrictMode>
     <AuthProvider>
       <ThemeProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <BoardThemeProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </BoardThemeProvider>
       </ThemeProvider>
     </AuthProvider>
   </React.StrictMode>

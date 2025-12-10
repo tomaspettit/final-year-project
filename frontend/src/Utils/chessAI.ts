@@ -1,5 +1,5 @@
-import type { Board, PieceColor, Position} from '../Types/chess';
-import { getAllLegalMoves, simulateMove, isCheckmate} from './chessLogic';
+import type { Board, PieceColor, Position } from '../Types/chess';
+import { getAllLegalMoves, simulateMove, isCheckmate } from './chessLogic';
 
 const PIECE_VALUES = {
   pawn: 100,
@@ -257,18 +257,22 @@ function getIntermediateMove(
   moves: Array<{ from: Position; to: Position }>,
   aiColor: PieceColor
 ): { from: Position; to: Position } {
-  // Evaluate each move and add some randomness
-  const evaluatedMoves = moves.map(move => {
+  // Sample up to 10 random moves for speed
+  const sampledMoves = moves.length > 10
+    ? Array.from({ length: 10 }, () => moves[Math.floor(Math.random() * moves.length)])
+    : moves;
+
+  const evaluatedMoves = sampledMoves.map(move => {
     const newBoard = simulateMove(board, move.from, move.to);
     const score = evaluateBoard(newBoard, aiColor);
     const randomFactor = Math.random() * 150 - 75; // Add ±75 random value
     return { move, score: score + randomFactor };
   });
-  
+
   evaluatedMoves.sort((a, b) => b.score - a.score);
-  
-  // Pick from top 5 moves randomly
-  const topMoves = evaluatedMoves.slice(0, Math.min(5, evaluatedMoves.length));
+
+  // Pick from top 3 moves randomly
+  const topMoves = evaluatedMoves.slice(0, Math.min(3, evaluatedMoves.length));
   const selected = topMoves[Math.floor(Math.random() * topMoves.length)];
   return selected.move;
 }

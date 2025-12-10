@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
-  IconButton,
   CircularProgress,
   Box,
   Typography,
@@ -17,12 +16,12 @@ import {
   TextField,
   LinearProgress,
 } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SchoolIcon from "@mui/icons-material/School";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../firebase";
+import AppBarComponent from "../Components/AppBarComponent";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -32,27 +31,42 @@ const Profile = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [rating, setRating] = useState("");
-  const [histories, setHistories] = useState<any[]>([]);
-  const [loadingHistories, setLoadingHistories] = useState(false);
+    // --- Recent Games State ---
+  const [recentGames, setRecentGames] = useState<any[]>([]);
+  const [loadingRecentGames, setLoadingRecentGames] = useState(false);
 
-  const fetchUserHistories = async (userId: string) => {
-    setLoadingHistories(true);
+  // Fetch recent games from backend
+  const fetchRecentGames = async () => {
+    setLoadingRecentGames(true);
     try {
-      // Use the subcollection path that matches other pages
-      const historiesRef = collection(firestore, `users/${userId}/histories`);
-      const querySnapshot = await getDocs(historiesRef);
-      
-      const userHistories: any[] = [];
-      querySnapshot.forEach((doc) => {
-        userHistories.push({ id: doc.id, ...doc.data() });
-      });
-      
-      console.log("Fetched histories:", userHistories);
-      setHistories(userHistories);
-    } catch (error) {
-      console.error("Error fetching histories:", error);
+      const res = await fetch('/games');
+      if (!res.ok) throw new Error('Failed to fetch recent games');
+      const data = await res.json();
+      setRecentGames(data);
+    } catch (err) {
+      console.error('Error fetching recent games:', err);
     } finally {
-      setLoadingHistories(false);
+      setLoadingRecentGames(false);
+    }
+  };
+
+  // Add a demo recent game (for testing)
+  const addDemoRecentGame = async () => {
+    try {
+      const res = await fetch('/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opponent: 'Demo Opponent',
+          result: 'win',
+          timeControl: 10,
+          moves: 42
+        })
+      });
+      if (!res.ok) throw new Error('Failed to add demo game');
+      await fetchRecentGames();
+    } catch (err) {
+      console.error('Error adding demo game:', err);
     }
   };
 
@@ -72,9 +86,8 @@ const Profile = () => {
           if (!data.name || !data.rating) {
             setIsModalOpen(true);
           }
-          
           // Fetch user's histories
-          await fetchUserHistories(user.uid);
+          await fetchRecentGames();
         } else {
           // 🔹 If user is new (no Firestore entry), create a profile and ask for details
           await setDoc(userRef, {
@@ -87,6 +100,7 @@ const Profile = () => {
         setLoading(false);
       };
       fetchUserData();
+      fetchRecentGames();
     } else {
       setLoading(false);
     }
@@ -114,15 +128,9 @@ const Profile = () => {
   }
 
   return (
+    <>
+    <AppBarComponent title="Settings" isBackButton={false} isSettings={true} isExit={true}/>
     <Box sx={{ padding: 3, textAlign: "center", maxWidth: 700, mx: "auto" }}>
-      {/* Header with Settings Icon */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h4" color="#5500aa" fontWeight="bold">Profile</Typography>
-        <IconButton onClick={() => navigate("/settings")} sx={{ color: "#5500aa" }}>
-          <SettingsIcon sx={{ fontSize: 30 }} />
-        </IconButton>
-      </Box>
-
       {/* User Info Section */}
       <Paper sx={{ 
         padding: 3, 
@@ -155,81 +163,35 @@ const Profile = () => {
 
       <Divider sx={{ mb: 3, bgcolor: "#ddaaff" }} />
 
-      {/* Histories Section */}
-      <Typography variant="h6" sx={{ mb: 2 }} color="#5500aa" fontWeight="bold">Your Histories</Typography>
-
-      {loadingHistories ? (
+      {/* Recent Games Section */}
+      <Divider sx={{ my: 3, bgcolor: "#ddaaff" }} />
+      <Typography variant="h6" sx={{ mb: 2 }} color="#5500aa" fontWeight="bold">Recent Games</Typography>
+      {loadingRecentGames ? (
         <Box sx={{ width: '100%' }}>
-          <LinearProgress sx={{
-            height: 8,
-            borderRadius: 5,
-            bgcolor: "#f0e6ff",
-            "& .MuiLinearProgress-bar": {
-              bgcolor: "#5500aa",
-            },
-          }} />
+          <LinearProgress sx={{ height: 8, borderRadius: 5, bgcolor: "#f0e6ff", "& .MuiLinearProgress-bar": { bgcolor: "#5500aa" } }} />
         </Box>
-      ) : histories.length > 0 ? (
-        <Grid container spacing={2}>
-          {histories.map((history) => (
-            <Grid size={{xs: 12}} key={history.id}>
-              <Card 
-                sx={{ 
-                  borderRadius: 2, 
-                  boxShadow: '0 4px 12px rgba(85, 0, 170, 0.1)', 
-                  backgroundColor: "#ffffff",
-                  cursor: 'pointer',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                  '&:hover': { 
-                    transform: 'scale(1.02)',
-                    boxShadow: '0 8px 16px rgba(85, 0, 170, 0.15)'
-                  }
-                }}
-                // Dialog navigation can be added here
-                
-              >
+      ) : recentGames.length > 0 ? (
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          {recentGames.map((game) => (
+            <Grid size={{xs: 12}} key={game._id || game.id}>
+              <Card sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(85, 0, 170, 0.1)', backgroundColor: "#fff" }}>
                 <CardContent>
-                  <Typography variant="h6" color="#5500aa">{history.name}</Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Last Quizzed: {history.lastTested ? new Date(history.lastTested.toDate()).toLocaleDateString() : 'Never'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {history.description ? "Has description" : "No description"}
-                    </Typography>
-                  </Box>
-                  {history.proficiency !== undefined && (
-                    <Box sx={{ mt: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Proficiency: {history.proficiency}%
-                      </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={history.proficiency || 0} 
-                        sx={{ 
-                          mt: 0.5, 
-                          height: 8, 
-                          borderRadius: 2,
-                          bgcolor: "#f0e6ff",
-                          "& .MuiLinearProgress-bar": {
-                            bgcolor: "#5500aa",
-                          },
-                        }}
-                      />
-                    </Box>
-                  )}
+                  <Typography variant="h6" color="#5500aa">Opponent: {game.opponent}</Typography>
+                  <Typography variant="body2" color="text.secondary">Result: {game.result}</Typography>
+                  <Typography variant="body2" color="text.secondary">Time Control: {game.timeControl} min</Typography>
+                  <Typography variant="body2" color="text.secondary">Moves: {game.moves}</Typography>
+                  <Typography variant="body2" color="text.secondary">Date: {game.date ? new Date(game.date).toLocaleString() : 'N/A'}</Typography>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
       ) : (
-        <Typography variant="body1" sx={{ color: "text.secondary", mt: 2 }}>
-          You have no histories yet. Click "Let's Play" to start playing chess and create your first history!
-        </Typography>
-      )}
-
-      {/* Add Play Button */}
+        <Box>
+          <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
+            No recent games found.
+          </Typography>
+          {/* Add Play Button */}
       <Button
         variant="contained"
         sx={{ 
@@ -248,6 +210,16 @@ const Profile = () => {
         onClick={() => navigate("/play")}
       >
         Let's Play
+      </Button>
+        </Box>
+      )}
+      <Button
+        variant="outlined"
+        sx={{ mb: 3, color: "#5500aa", borderColor: "#ddaaff", '&:hover': { borderColor: '#5500aa', bgcolor: '#f7f0ff' } }}
+        startIcon={<AddCircleIcon />}
+        onClick={addDemoRecentGame}
+      >
+        Add Demo Recent Game
       </Button>
 
       {/* Modal for Name & Rating Entry */}
@@ -328,6 +300,7 @@ const Profile = () => {
         </Box>
       </Modal>
     </Box>
+    </>
   );
 };
 

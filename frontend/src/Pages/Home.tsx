@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, CircularProgress, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-import { useTheme } from "../Context/ThemeContext";
-import { Sun, Moon } from "lucide-react";
+import AppBarComponent from "../Components/AppBarComponent";
 import { getUserRating } from "../Utils/FirestoreService";
 
 const Home = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { isDark, toggleTheme } = useTheme();
     const [loading, setLoading] = useState<boolean>(true);
     const [userData, setUserData] = useState<any>(null);
+    const [recentGames, setRecentGames] = useState<any[]>([]);
+    const [loadingRecentGames, setLoadingRecentGames] = useState<boolean>(false);
 
     useEffect(() => {
     // Fetch user's modules when the component mounts
@@ -32,6 +32,26 @@ const Home = () => {
     fetchUserData();
   }, [user]);
 
+  // Fetch recent games from backend
+  const fetchRecentGames = async () => {
+    setLoadingRecentGames(true);
+    try {
+      const res = await fetch('/games');
+      if (!res.ok) throw new Error('Failed to fetch recent games');
+      const data = await res.json();
+      setRecentGames(data);
+    } catch (err) {
+      console.error('Error fetching recent games:', err);
+    } finally {
+      setLoadingRecentGames(false);
+    }
+  };
+
+  // Call fetchRecentGames on mount
+  useEffect(() => {
+    fetchRecentGames();
+  }, []);
+
   // Show loading indicator while fetching data
   if (loading) {
     return (
@@ -49,14 +69,13 @@ const Home = () => {
   }
 
     return(
+      <>
+      <AppBarComponent title="Home" isBackButton={false} isSettings={true} isExit={true}/>
     <Box sx={{ p: 3, pb: 10 }}>
       {/* Welcome Section */}
       <Box sx={{ mb: 4, textAlign: "center" }}>
         <Typography variant="h4" color="#5500aa" fontWeight="bold" gutterBottom>
           Welcome, {userData?.name || "Chess Player"}!
-          <Button onClick={toggleTheme} sx={{ mt: 2 }}>
-          {isDark ? <Sun /> : <Moon />}
-        </Button>
         </Typography>
         {userData?.rating && (
           <Typography variant="body1" color="text.secondary">
@@ -73,7 +92,51 @@ const Home = () => {
             <Button color="primary" onClick={() => navigate("/profile")} sx={{ fontWeight: "bold" }}>
                 See All
             </Button>
-            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", overflowX: "auto", pb: 1 }}>
+            {loadingRecentGames ? (
+              <CircularProgress sx={{ color: "#5500aa" }} />
+            ) : recentGames.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                No recent games found.
+              </Typography>
+            ) : (
+              recentGames.slice(0, 5).map((game) => (
+                <Card
+                  key={game.id}
+                  sx={{
+                    minWidth: 200,
+                    mr: 2,
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(85, 0, 170, 0.1)",
+                    bgcolor: "#f3e8ff",
+                    flexShrink: 0,
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      {game.opponentName || "Opponent"}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Result: {game.result}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Date: {new Date(game.date).toLocaleDateString()}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => navigate(`/game/${game.id}`)}
+                      sx={{ fontWeight: "bold", borderRadius: "8px" }}
+                    >
+                      View Game
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </Box>
     </Box>
 
     {/* Quick Info Section */}
@@ -162,6 +225,7 @@ const Home = () => {
         </CardContent>
       </Card>
     </Box>
+    </>
     );
 };
 

@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
 import GameSetup from '../Components/PlayComponents/GameSetup';
 import GameScreen from '../Components/PlayComponents/GameScreen';
 import type { GameMode } from '../Types/chess';
 import Box from '@mui/material/Box';
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { IconButton } from '@mui/material';
+import AppBarComponent from '../Components/AppBarComponent';
 
 type Screen = 'setup' | 'game';
 
@@ -17,7 +15,6 @@ interface GameConfig {
 }
 
 const Play = () => {
-  const navigate = useNavigate();
   const [currentScreen, setCurrentScreen] = useState<Screen>('setup');
   const [gameConfig, setGameConfig] = useState<GameConfig>({
     gameMode: 'ai',
@@ -38,16 +35,17 @@ const Play = () => {
   if (currentScreen === 'setup') {
     return (
     <Box>
-      <IconButton sx={{ position: 'absolute', top: 16, left: 16, width: 40, height: 40 }} onClick={() => navigate(-1)}>
-        <ArrowBackIcon />
-      </IconButton>
-    <GameSetup onStartGame={handleStartGame} />
+      <AppBarComponent title="Game Setup" isBackButton={true} isSettings={true} isExit={true}/>
+      <Box sx={{ mt: 2 }}>
+        <GameSetup onStartGame={handleStartGame} />
+      </Box>
     </Box>
     );
   }
 
   return (
     <Box>
+    <AppBarComponent title={`Player vs ${gameConfig.gameMode}`} isBackButton={false} isSettings={false} isExit={false}/>
     <GameScreen
       gameMode={gameConfig.gameMode}
       difficulty={gameConfig.difficulty}

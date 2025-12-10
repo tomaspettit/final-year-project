@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../Context/AuthContext";
-import { useTheme } from "../Context/ThemeContext";
 import { useNavigate } from "react-router-dom";
+import { useBoardTheme } from "../Context/BoardThemeContext";
 import {
   Box,
   Button,
@@ -9,7 +9,6 @@ import {
   CardContent,
   Typography,
   Divider,
-  IconButton,
   Snackbar,
   Alert,
   Dialog,
@@ -23,9 +22,7 @@ import {
   FormLabel,
   CircularProgress
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CachedIcon from "@mui/icons-material/Cached";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import WarningIcon from "@mui/icons-material/Warning";
 import InstallPWA from "../Components/InstallPWA";
 import PaletteIcon from '@mui/icons-material/Palette';
@@ -34,10 +31,9 @@ import TextureIcon from '@mui/icons-material/Texture';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
 import LensIcon from '@mui/icons-material/Lens';
-import { Sun, Moon } from "lucide-react";
+import AppBarComponent from "../Components/AppBarComponent";
 
 const Settings: React.FC = () => {
-  const { isDark, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -47,12 +43,7 @@ const Settings: React.FC = () => {
   const [isClearing, setIsClearing] = useState(false);
   
   // Appearance settings with state
-  const [boardTheme, setBoardTheme] = useState(
-    localStorage.getItem('boardTheme') || 'classic'
-  );
-  const [pieceSet, setPieceSet] = useState(
-    localStorage.getItem('pieceSet') || 'standard'
-  );
+  const { boardTheme, setBoardTheme, pieceSet, setPieceSet } = useBoardTheme();
 
   // Function to clear cache (only Cache API, not auth storage)
   const clearCache = async () => {
@@ -81,18 +72,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/", { replace: true });
-    } catch (error) {
-      console.error("Logout failed", error);
-      setSnackbarMessage("Logout failed");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
   const handleClearCacheConfirmed = async () => {
     setConfirmDialogOpen(false);
     const success = await clearCache();
@@ -105,18 +84,16 @@ const Settings: React.FC = () => {
 
   // Handle appearance changes
   const handleBoardThemeChange = (theme: string) => {
-    setBoardTheme(theme);
-    localStorage.setItem('boardTheme', theme);
-    // TODO: Apply theme to board component
+    setBoardTheme(theme as "classic" | "modern" | "wooden");
   };
 
   const handlePieceSetChange = (set: string) => {
-    setPieceSet(set);
-    localStorage.setItem('pieceSet', set);
-    // TODO: Apply piece set to board component
+    setPieceSet(set as "standard" | "fancy" | "minimal");
   };
 
   return (
+    <>
+    <AppBarComponent title="Settings" isBackButton={true} isSettings={false} isExit={true}/>
     <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", p: 2 }}>
       <Card sx={{ 
         width: "100%",
@@ -127,23 +104,12 @@ const Settings: React.FC = () => {
         borderRadius: 3,
       }}>
         <CardContent>
-          {/* Back Button */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <IconButton onClick={() => navigate("/profile")} color="primary">
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h5" color="primary" fontWeight="bold">Settings</Typography>
-          </Box>
-
+          
           <Divider sx={{ mb: 3 }} />
 
           <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
             Manage your account settings.
           </Typography>
-
-          <Button onClick={toggleTheme} sx={{ mt: 2, ml: 2 }}>
-                  {isDark ? <Sun /> : <Moon />}
-          </Button>
 
           {/* Cache Management Section */}
           <Box sx={{ 
@@ -209,9 +175,6 @@ const Settings: React.FC = () => {
             <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
               Customize the look and feel of the application.
             </Typography>
-            <Button onClick={toggleTheme} sx={{ mt: 2, ml: 2 }}>
-                  {isDark ? <Sun /> : <Moon />}
-            </Button>
 
             {/* Board Theme */}
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -265,22 +228,6 @@ const Settings: React.FC = () => {
               </Select>
             </FormControl>
           </Box>
-
-          {/* Logout Button */}
-          <Button 
-            variant="contained" 
-            color="error"
-            startIcon={<ExitToAppIcon />}
-            fullWidth
-            sx={{ 
-              mt: 2,
-              borderRadius: 2,
-              py: 1.2,
-            }} 
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
         </CardContent>
       </Card>
       
@@ -338,6 +285,7 @@ const Settings: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Box>
+    </>
   );
 };
 

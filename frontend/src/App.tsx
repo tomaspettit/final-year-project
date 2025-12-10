@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { CircularProgress, Box, Fade, CssBaseline, ThemeProvider } from "@mui/material";
-import type { Theme } from "@mui/material";
 import Landing from './Pages/Landing'
 import Home from './Pages/Home'
 import Settings from './Pages/Settings'
@@ -13,11 +12,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from './firebase';
 import './App.css'
 import { useTheme } from "./Context/ThemeContext"; // <-- Import your custom hook
-
-export interface ThemeContextType {
-  theme: Theme; // <-- Make sure this exists
-  toggleTheme: () => void;
-}
 
 function App() {
   const location = useLocation();
